@@ -73,6 +73,22 @@ npm run dev
 
 4. Set your LeetCode username in Settings, then click Sync to import your submission history.
 
+## How SM-2 Works
+
+After solving a problem you rate your recall: **0 - Again**, **1 - Hard**, **2 - Good**, **3 - Easy**.
+
+The algorithm maps this to a quality score (0-5) and updates three values:
+
+| Value | What it does |
+|---|---|
+| Easiness Factor (EF) | Scales how fast the interval grows. Starts at 2.5, drops on hard ratings, floors at 1.3. |
+| Interval | Days until next review. Starts at 1, then 6, then `interval x EF` on each success. |
+| Repetitions | Resets to 0 on a failed recall (quality < 3), increments otherwise. |
+
+At 5 repetitions the problem is marked mastered and removed from the queue permanently. Easy problems skip the queue entirely.
+
+Review dates are also load-balanced: if the SM-2 target date is already full, the review is pushed forward day by day until a free slot is found (max 60 days ahead).
+
 ## Learnings
 
 - **SM-2 from scratch** - Implementing SuperMemo-2 directly clarified how EF decay works and why the minimum EF of 1.3 prevents runaway short intervals.
