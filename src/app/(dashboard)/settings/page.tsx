@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { redirect } from "next/navigation";
 import { getUserProfile } from "@/actions/profile";
 import { Card } from "@/components/ui/card";

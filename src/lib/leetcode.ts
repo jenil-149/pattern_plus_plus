@@ -4,10 +4,16 @@
  * Falls back to localhost in development.
  */
 function getLeetCodeProxyUrl(): string {
-  const base =
-    process.env.NEXT_PUBLIC_APP_URL ??
-    `http://localhost:${process.env.PORT ?? 3000}`;
-  return `${base}/api/leetcode`;
+  // NEXT_PUBLIC_APP_URL: manually set (dev or prod override)
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return `${process.env.NEXT_PUBLIC_APP_URL}/api/leetcode`;
+  }
+  // VERCEL_URL: auto-set by Vercel on every deployment (no protocol prefix)
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}/api/leetcode`;
+  }
+  // Local development fallback
+  return `http://localhost:${process.env.PORT ?? 3000}/api/leetcode`;
 }
 
 /**
