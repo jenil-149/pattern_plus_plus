@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Dumbbell, Loader2 } from "lucide-react";
 import { WorkoutCard } from "./WorkoutCard";
@@ -15,6 +15,11 @@ export function WorkoutSection({ initialProblems }: WorkoutSectionProps) {
   const [problems, setProblems] = useState<WorkoutProblem[]>(initialProblems);
   const [loadingMap, setLoadingMap] = useState<Record<string, boolean>>({});
   const router = useRouter();
+
+  // Sync with fresh server data whenever the parent re-fetches (e.g. after router.refresh())
+  useEffect(() => {
+    setProblems(initialProblems);
+  }, [initialProblems]);
 
   const handleRate = async (problemId: string, rating: number) => {
     setLoadingMap((prev) => ({ ...prev, [problemId]: true }));
