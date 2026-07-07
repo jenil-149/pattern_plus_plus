@@ -16,15 +16,34 @@ export function WorkoutSection({ initialProblems }: WorkoutSectionProps) {
   const [loadingMap, setLoadingMap] = useState<Record<string, boolean>>({});
   const router = useRouter();
 
+  // Compute the client's local date string once (YYYY-MM-DD)
+  // This is passed to server actions so they use the user's local date
+  // regardless of what timezone the server is in (Vercel runs UTC).
+  const getClientTodayStr = () => {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  };
+
   // Sync with fresh server data whenever the parent re-fetches (e.g. after router.refresh())
+  // Also re-fetch on mount using the CLIENT's local date so the workout matches
+  // the user's timezone (server may be UTC, user may be IST).
   useEffect(() => {
     setProblems(initialProblems);
   }, [initialProblems]);
 
+  useEffect(() => {
+    getDailyWorkout(getClientTodayStr()).then(setProblems).catch(console.error);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleRate = async (problemId: string, rating: number) => {
     setLoadingMap((prev) => ({ ...prev, [problemId]: true }));
     try {
-      await rateWorkoutProblem(problemId, rating);
+      const todayStr = getClientTodayStr();
+      await rateWorkoutProblem(problemId, rating, todayStr);
       
       setProblems((prev) =>
         prev.map((p) =>
@@ -33,7 +52,8 @@ export function WorkoutSection({ initialProblems }: WorkoutSectionProps) {
       );
       
       toast.success("Progress saved successfully!");
-      router.refresh();
+      // Re-fetch with client date so problems reflect the user's local date
+      getDailyWorkout(todayStr).then(setProblems).catch(console.error);
     } catch (err) {
       console.error(err);
       toast.error("Failed to save progress rating.");
@@ -46,7 +66,8 @@ export function WorkoutSection({ initialProblems }: WorkoutSectionProps) {
     setLoadingMap((prev) => ({ ...prev, [problemId]: true }));
     const nextSolved = !isCurrentlySolved;
     try {
-      await toggleWorkoutProblemSolved(problemId, nextSolved);
+      const todayStr = getClientTodayStr();
+      await toggleWorkoutProblemSolved(problemId, nextSolved, todayStr);
 
       setProblems((prev) =>
         prev.map((p) =>
@@ -66,7 +87,7 @@ export function WorkoutSection({ initialProblems }: WorkoutSectionProps) {
         toast.success("Problem marked as unsolved.");
       }
       
-      router.refresh();
+      getDailyWorkout(todayStr).then(setProblems).catch(console.error);
     } catch (err) {
       console.error(err);
       toast.error("Failed to update solved status.");
@@ -74,6 +95,7 @@ export function WorkoutSection({ initialProblems }: WorkoutSectionProps) {
       setLoadingMap((prev) => ({ ...prev, [problemId]: false }));
     }
   };
+
 
   return (
     <div className="space-y-6 relative">

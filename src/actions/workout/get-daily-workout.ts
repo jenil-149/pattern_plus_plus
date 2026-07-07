@@ -8,7 +8,7 @@ import { getLocalDateStr, patternToSlug, toWorkoutProblem } from "./utils";
 /**
  * Fetches or generates today's "Daily 3" workout problems for the authenticated user.
  */
-export async function getDailyWorkout(): Promise<WorkoutProblem[]> {
+export async function getDailyWorkout(clientTodayStr?: string): Promise<WorkoutProblem[]> {
   const supabase = await createClient();
 
   const {
@@ -19,7 +19,8 @@ export async function getDailyWorkout(): Promise<WorkoutProblem[]> {
     return [];
   }
 
-  const todayStr = getLocalDateStr(new Date());
+  // Use the client's local date if provided (avoids server UTC vs IST mismatch)
+  const todayStr = clientTodayStr ?? getLocalDateStr(new Date());
 
   // 1. Get today's activity to check solved statuses and ratings
   const { data: todayActivity, error: activityError } = await supabase

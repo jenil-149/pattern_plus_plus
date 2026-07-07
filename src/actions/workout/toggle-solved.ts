@@ -9,7 +9,8 @@ import { rateWorkoutProblem } from "./rate-problem";
  */
 export async function toggleWorkoutProblemSolved(
   problemId: string,
-  isSolved: boolean
+  isSolved: boolean,
+  clientTodayStr?: string
 ): Promise<void> {
   const supabase = await createClient();
 
@@ -21,11 +22,11 @@ export async function toggleWorkoutProblemSolved(
     throw new Error("Not authenticated");
   }
 
-  const todayStr = getLocalDateStr(new Date());
+  const todayStr = clientTodayStr ?? getLocalDateStr(new Date());
 
   if (isSolved) {
     // Default to rating 3 (quality 3: correct recall with difficulty)
-    await rateWorkoutProblem(problemId, 3);
+    await rateWorkoutProblem(problemId, 3, todayStr);
   } else {
     // 1. Delete today's activity log entry
     await supabase
@@ -65,3 +66,4 @@ export async function toggleWorkoutProblemSolved(
     }
   }
 }
+

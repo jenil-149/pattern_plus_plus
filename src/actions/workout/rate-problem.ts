@@ -10,7 +10,8 @@ import { getLocalDateStr } from "./utils";
  */
 export async function rateWorkoutProblem(
   problemId: string,
-  rating: number
+  rating: number,
+  clientTodayStr?: string
 ): Promise<void> {
   const supabase = await createClient();
 
@@ -98,7 +99,7 @@ export async function rateWorkoutProblem(
   }
 
   // 4. Log solving activity
-  const todayStr = getLocalDateStr(new Date());
+  const todayStr = clientTodayStr ?? getLocalDateStr(new Date());
 
   // Clean old log for today to prevent duplicates
   await supabase
