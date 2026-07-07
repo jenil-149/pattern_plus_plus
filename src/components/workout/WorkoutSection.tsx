@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Dumbbell, Loader2 } from "lucide-react";
 import { WorkoutCard } from "./WorkoutCard";
-import { rateWorkoutProblem, toggleWorkoutProblemSolved, WorkoutProblem } from "@/actions/workout";
+import { getDailyWorkout, rateWorkoutProblem, toggleWorkoutProblemSolved, WorkoutProblem } from "@/actions/workout";
 import { toast } from "sonner";
 
 interface WorkoutSectionProps {
