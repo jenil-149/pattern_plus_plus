@@ -16,9 +16,6 @@ export function WorkoutSection({ initialProblems }: WorkoutSectionProps) {
   const [loadingMap, setLoadingMap] = useState<Record<string, boolean>>({});
   const router = useRouter();
 
-  // Compute the client's local date string once (YYYY-MM-DD)
-  // This is passed to server actions so they use the user's local date
-  // regardless of what timezone the server is in (Vercel runs UTC).
   const getClientTodayStr = () => {
     const d = new Date();
     const y = d.getFullYear();
@@ -27,16 +24,12 @@ export function WorkoutSection({ initialProblems }: WorkoutSectionProps) {
     return `${y}-${m}-${day}`;
   };
 
-  // Sync with fresh server data whenever the parent re-fetches (e.g. after router.refresh())
-  // Also re-fetch on mount using the CLIENT's local date so the workout matches
-  // the user's timezone (server may be UTC, user may be IST).
   useEffect(() => {
     setProblems(initialProblems);
   }, [initialProblems]);
 
   useEffect(() => {
     getDailyWorkout(getClientTodayStr()).then(setProblems).catch(console.error);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleRate = async (problemId: string, rating: number) => {
@@ -52,7 +45,6 @@ export function WorkoutSection({ initialProblems }: WorkoutSectionProps) {
       );
       
       toast.success("Progress saved successfully!");
-      // Re-fetch with client date so problems reflect the user's local date
       getDailyWorkout(todayStr).then(setProblems).catch(console.error);
     } catch (err) {
       console.error(err);
