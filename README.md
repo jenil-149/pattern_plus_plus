@@ -16,6 +16,17 @@ A LeetCode study tracker that generates a personalized daily "Daily 3" workout u
 - Analytics page with solve charts
 - Dark mode via next-themes
 
+## Demo
+
+### Dashboard
+![Dashboard — activity heatmap, streak stats, and daily workout cards](demo/Dashboard.png)
+
+### Daily Workout
+![Daily Workout — rate mastery and mark problems solved](demo/Workout.png)
+
+### Problem Bank
+![Problem Bank — search, filter, and manage your LeetCode collection](demo/ProblemsSet.png)
+
 ## Tech Stack
 
 | Layer | Technology |
