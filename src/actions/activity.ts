@@ -1,14 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-
-// Helper to format Date object into local YYYY-MM-DD string
-function getLocalDateStr(d: Date): string {
-  const year = d.getUTCFullYear();
-  const month = String(d.getUTCMonth() + 1).padStart(2, "0");
-  const day = String(d.getUTCDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
+import { getLocalDateStr } from "@/lib/utils";
 
 export interface DashboardStats {
   currentStreak: number;
@@ -68,10 +61,10 @@ export async function getDashboardStats(): Promise<DashboardStats> {
   // Calculate current streak
   let currentStreak = 0;
   if (activeDays > 0) {
-    const todayStr = getLocalDateStr(new Date());
+    const todayStr = getLocalDateStr(new Date(), undefined, true);
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayStr = getLocalDateStr(yesterday);
+    const yesterdayStr = getLocalDateStr(yesterday, undefined, true);
 
     // If the most recent solve is today or yesterday, the streak is alive
     if (uniqueDates[0] === todayStr || uniqueDates[0] === yesterdayStr) {
@@ -81,7 +74,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
       for (let i = 1; i < uniqueDates.length; i++) {
         const expectedPrev = new Date(checkDate);
         expectedPrev.setDate(expectedPrev.getDate() - 1);
-        const expectedPrevStr = getLocalDateStr(expectedPrev);
+        const expectedPrevStr = getLocalDateStr(expectedPrev, undefined, true);
 
         if (uniqueDates[i] === expectedPrevStr) {
           currentStreak++;
@@ -118,7 +111,7 @@ export async function getHeatmapData(): Promise<Record<string, number>> {
   const daysAgoLimit = 280;
   const limitDate = new Date();
   limitDate.setDate(limitDate.getDate() - daysAgoLimit);
-  const limitDateStr = getLocalDateStr(limitDate);
+  const limitDateStr = getLocalDateStr(limitDate, undefined, true);
 
   const { data, error } = await supabase
     .from("activity_log")

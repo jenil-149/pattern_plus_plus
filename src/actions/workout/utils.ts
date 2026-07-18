@@ -1,15 +1,61 @@
 import { DatabaseProblem, WorkoutProblem } from "./types";
-
-export function getLocalDateStr(d: Date): string {
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
+export { getLocalDateStr } from "@/lib/utils";
 
 export function patternToSlug(pattern: string): string {
   return pattern.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
+
+/**
+ * Checks if a problem exists in the local database, and if not, fetches details
+ * via the provided callback and inserts it.
+ */
+export async function getOrInsertProblem(
+  supabase: any,
+  titleSlug: string,
+  fetchDetails: () => Promise<{
+    title: string;
+    leetcode_num: number;
+    title_slug: string;
+    difficulty: string;
+    patterns: string[];
+  } | null>
+): Promise<DatabaseProblem | null> {
+  const { data: existing } = await supabase
+    .from("problems")
+    .select("*")
+    .eq("title_slug", titleSlug)
+    .maybeSingle();
+
+  if (existing) {
+    return existing as unknown as DatabaseProblem;
+  }
+
+  const details = await fetchDetails();
+  if (!details) return null;
+
+  const difficulty = details.difficulty === "Hard" ? "Hard" : details.difficulty === "Easy" ? "Easy" : "Medium";
+
+  const { data: inserted, error } = await supabase
+    .from("problems")
+    .insert({
+      title: details.title,
+      leetcode_num: details.leetcode_num,
+      title_slug: details.title_slug,
+      difficulty,
+      patterns: details.patterns,
+      url: `https://leetcode.com/problems/${details.title_slug}`,
+    })
+    .select("*")
+    .single();
+
+  if (error) {
+    console.error("Error inserting problem:", error);
+    return null;
+  }
+
+  return inserted as unknown as DatabaseProblem;
+}
+
 
 /**
  * Transforms a DatabaseProblem into a WorkoutProblem for the UI.

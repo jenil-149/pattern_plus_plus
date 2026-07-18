@@ -2,29 +2,18 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { fetchProblemDetails } from "@/lib/leetcode";
+import { getLocalDateStr } from "@/lib/utils";
 
 /**
  * Parses and extracts the LeetCode title slug from a string (can be a raw slug or a URL).
  */
 function extractSlug(input: string): string {
   const trimmed = input.trim();
-  if (!trimmed) return "";
-
   if (trimmed.startsWith("http")) {
-    try {
-      const url = new URL(trimmed);
-      const pathParts = url.pathname.split("/").filter(Boolean);
-      const problemsIndex = pathParts.indexOf("problems");
-      if (problemsIndex !== -1 && pathParts[problemsIndex + 1]) {
-        return pathParts[problemsIndex + 1];
-      }
-    } catch {
-      // Return trimmed input on URL parse failure
-    }
+    const match = trimmed.match(/\/problems\/([^/]+)/);
+    if (match) return match[1];
   }
-
-  // Remove trailing slashes and take the last part if they copied a slug with slashes
-  return trimmed.replace(/\/$/, "").split("/").pop() || trimmed;
+  return trimmed.replace(/\/+$/, "").split("/").pop() || trimmed;
 }
 
 /**
@@ -92,12 +81,6 @@ export async function addProblemBySlug(searchInput: string): Promise<void> {
   }
 }
 
-function getLocalDateStr(d: Date): string {
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
 
 /**
  * One-time rebalance of existing review dates.

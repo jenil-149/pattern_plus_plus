@@ -4,13 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { fetchRecentSubmissions, fetchProblemDetails } from "@/lib/leetcode";
 import { calculateSM2 } from "@/lib/sm2";
 import { getBalancedReviewDate } from "@/lib/review-spread";
-
-function getLocalDateStr(d: Date): string {
-  const year = d.getUTCFullYear();
-  const month = String(d.getUTCMonth() + 1).padStart(2, "0");
-  const day = String(d.getUTCDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
+import { getLocalDateStr } from "@/lib/utils";
+import { getOrInsertProblem } from "./workout/utils";
 
 export interface SyncResult {
   success: boolean;
@@ -125,28 +120,11 @@ export async function syncLeetCodeSubmissions(): Promise<SyncResult> {
           continue;
         }
 
-        const { data: newProb, error: insertError } = await supabase
-          .from("problems")
-          .insert({
-            title: details.title,
-            leetcode_num: details.leetcode_num,
-            title_slug: details.title_slug,
-            difficulty: details.difficulty,
-            patterns: details.patterns,
-            url: `https://leetcode.com/problems/${details.title_slug}`,
-          })
-          .select("id, title_slug, difficulty, patterns")
-          .single();
-
-        if (insertError || !newProb || !newProb.id) {
-          console.error("Failed to insert dynamically fetched problem:", insertError);
-          continue;
-        }
-
-        const typedNewProb = newProb as unknown as DatabaseProblem;
-        problemId = typedNewProb.id;
-        difficulty = typedNewProb.difficulty;
-        slugToProblem.set(details.title_slug, typedNewProb);
+        const newProb = await getOrInsertProblem(supabase, sub.titleSlug, async () => details);
+        if (!newProb) continue;
+        problemId = newProb.id;
+        difficulty = newProb.difficulty;
+        slugToProblem.set(sub.titleSlug, newProb);
       } else {
         continue; // Skip if we failed to fetch details
       }
@@ -161,7 +139,7 @@ export async function syncLeetCodeSubmissions(): Promise<SyncResult> {
       continue;
     }
     const subDate = new Date(timestampSec * 1000);
-    const dateStr = getLocalDateStr(subDate);
+    const dateStr = getLocalDateStr(subDate, undefined, true);
     const key = `${problemId}_${dateStr}`;
 
     // Skip if already logged for this specific day
@@ -206,7 +184,7 @@ export async function syncLeetCodeSubmissions(): Promise<SyncResult> {
       nextReviewDateStr = "9999-12-31";
       status = "mastered";
     } else {
-      nextReviewDateStr = await getBalancedReviewDate(user.id, getLocalDateStr(sm2Result.nextReviewDate), problemId);
+      nextReviewDateStr = await getBalancedReviewDate(user.id, getLocalDateStr(sm2Result.nextReviewDate, undefined, true), problemId);
       status = "learning";
     }
 

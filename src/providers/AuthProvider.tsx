@@ -22,6 +22,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
+    // Set a timezone cookie so the server knows the client's local timezone
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    document.cookie = `timezone=${encodeURIComponent(tz)}; path=/; max-age=31536000; SameSite=Lax`;
+  }, []);
+
+  useEffect(() => {
     // 1. Get initial session
     const getInitialSession = async () => {
       try {

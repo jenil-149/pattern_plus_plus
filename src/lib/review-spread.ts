@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getLocalDateStr } from "@/lib/utils";
 
 /** Maximum number of problems to review on a single day */
 const MAX_REVIEWS_PER_DAY = 1;
@@ -6,17 +7,10 @@ const MAX_REVIEWS_PER_DAY = 1;
 /** Maximum number of days to search ahead for an open slot */
 const MAX_SPREAD_DAYS = 60;
 
-function getLocalDateStr(d: Date): string {
-  const year = d.getUTCFullYear();
-  const month = String(d.getUTCMonth() + 1).padStart(2, "0");
-  const day = String(d.getUTCDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
 function addDays(dateStr: string, days: number): string {
   const d = new Date(dateStr + "T00:00:00");
   d.setDate(d.getDate() + days);
-  return getLocalDateStr(d);
+  return getLocalDateStr(d, undefined, true);
 }
 
 /**
