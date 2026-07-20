@@ -119,6 +119,7 @@ export async function getDailyWorkout(clientTodayStr?: string): Promise<WorkoutP
       if (otherProblems) {
         const revisionPatterns = revisionProblem?.patterns || [];
         for (const p of otherProblems) {
+          if (workoutProblems.length >= 3) break;
           const prob = p as unknown as DatabaseProblem;
           const sharesPattern = revisionPatterns.length > 0 &&
             revisionPatterns.some((pat: string) => prob.patterns?.includes(pat));
