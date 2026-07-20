@@ -115,7 +115,7 @@ export function WorkoutSection({ initialProblems }: WorkoutSectionProps) {
         </div>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {problems.map((problem, idx) => (
+          {problems.slice(0, 3).map((problem, idx) => (
             <WorkoutCard
               key={problem.id}
               title={problem.title}

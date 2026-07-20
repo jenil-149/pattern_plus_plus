@@ -301,5 +301,5 @@ export async function getDailyWorkout(clientTodayStr?: string): Promise<WorkoutP
     }
   }
 
-  return workoutProblems;
+  return workoutProblems.slice(0, 3);
 }
