@@ -13,12 +13,7 @@ export interface SyncResult {
   count: number;
 }
 
-interface DatabaseProblem {
-  id: string;
-  title_slug: string;
-  patterns?: string[];
-  difficulty: string;
-}
+import { DatabaseProblem } from "./workout/types";
 
 /**
  * Synchronizes recent accepted LeetCode submissions with the user's progress and activity log.

@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useAuth } from "@/providers/AuthProvider";
 import { useAuthModal } from "@/hooks/useAuthModal";
 import { Auth } from "@supabase/auth-ui-react";
-import { darkThemes, ThemeSupa } from "@supabase/auth-ui-shared";
+import { ThemeSupa } from "@supabase/auth-ui-shared";
 import {
   Dialog,
   DialogContent,

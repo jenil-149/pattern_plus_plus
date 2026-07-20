@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useRef } from "react";
+
 interface HeatmapProps {
   cols?: number;
   rows?: number;
@@ -32,11 +34,22 @@ const getActivityLevelMock = (col: number, row: number) => {
 };
 
 export function Heatmap({ cols = 40, rows = 7, activityData }: HeatmapProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollLeft = containerRef.current.scrollWidth;
+    }
+  }, []);
+
   return (
     <div className="space-y-3">
       {/* Heatmap Grid Container */}
       <div className="relative">
-        <div className="grid grid-rows-7 grid-flow-col gap-1 md:gap-[5px] overflow-x-auto pb-2 max-w-full scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent">
+        <div
+          ref={containerRef}
+          className="grid grid-rows-7 grid-flow-col gap-1 md:gap-[5px] overflow-x-auto pb-2 max-w-full scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent"
+        >
           {Array.from({ length: cols }).map((_, colIdx) =>
             Array.from({ length: rows }).map((_, rowIdx) => {
               let level = 0;

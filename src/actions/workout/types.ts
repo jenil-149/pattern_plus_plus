@@ -22,15 +22,3 @@ export interface DatabaseProblem {
   patterns: string[];
 }
 
-export interface DatabaseUserProgress {
-  id: string;
-  user_id: string;
-  problem_id: string;
-  easiness_factor: number;
-  interval: number;
-  repetitions: number;
-  next_review_date: string;
-  last_reviewed_at: string;
-  status: string;
-  stuck_note: string | null;
-}

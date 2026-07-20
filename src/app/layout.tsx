@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Domine, Poppins } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/providers/AuthProvider";
-import ModalProvider from "@/providers/ModalProvider";
+import AuthModal from "@/components/layout/AuthModal";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
@@ -40,7 +40,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <AuthProvider>
           <TooltipProvider delayDuration={0}>
-            <ModalProvider />
+            <AuthModal />
             {children}
             <Toaster
               richColors

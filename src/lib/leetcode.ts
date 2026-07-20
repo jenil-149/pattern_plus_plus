@@ -151,32 +151,34 @@ export interface LeetCodeTagQuestion {
   }[];
 }
 
-export async function fetchProblemsByTag(tagSlug: string, limit = 10): Promise<LeetCodeTagQuestion[]> {
-  const query = `
-    query problemsetQuestionList($categorySlug: String, $limit: Int, $skip: Int, $filters: QuestionListFilterInput) {
-      problemsetQuestionList: questionList(
-        categorySlug: $categorySlug
-        limit: $limit
-        skip: $skip
-        filters: $filters
-      ) {
-        questions: data {
-          frontendQuestionId: questionFrontendId
-          title
-          titleSlug
-          difficulty
-          topicTags {
-            name
-            slug
-          }
+const PROBLEMSET_QUERY = `
+  query problemsetQuestionList($categorySlug: String, $limit: Int, $skip: Int, $filters: QuestionListFilterInput) {
+    problemsetQuestionList: questionList(
+      categorySlug: $categorySlug
+      limit: $limit
+      skip: $skip
+      filters: $filters
+    ) {
+      questions: data {
+        frontendQuestionId: questionFrontendId
+        title
+        titleSlug
+        difficulty
+        topicTags {
+          name
+          slug
         }
       }
     }
-  `;
+  }
+`;
 
+type ProblemsetResponse = { data?: { problemsetQuestionList?: { questions: LeetCodeTagQuestion[] } } };
+
+export async function fetchProblemsByTag(tagSlug: string, limit = 10): Promise<LeetCodeTagQuestion[]> {
   try {
-    const json = await graphqlFetch<{ data?: { problemsetQuestionList?: { questions: LeetCodeTagQuestion[] } } }>(
-      query,
+    const json = await graphqlFetch<ProblemsetResponse>(
+      PROBLEMSET_QUERY,
       { categorySlug: "", limit, skip: 0, filters: { tags: [tagSlug] } }
     );
     return json.data?.problemsetQuestionList?.questions || [];
@@ -187,34 +189,12 @@ export async function fetchProblemsByTag(tagSlug: string, limit = 10): Promise<L
 }
 
 export async function fetchRandomLeetCodeProblems(difficulty: "MEDIUM" | "HARD", limit = 50): Promise<LeetCodeTagQuestion[]> {
-  const query = `
-    query problemsetQuestionList($categorySlug: String, $limit: Int, $skip: Int, $filters: QuestionListFilterInput) {
-      problemsetQuestionList: questionList(
-        categorySlug: $categorySlug
-        limit: $limit
-        skip: $skip
-        filters: $filters
-      ) {
-        questions: data {
-          frontendQuestionId: questionFrontendId
-          title
-          titleSlug
-          difficulty
-          topicTags {
-            name
-            slug
-          }
-        }
-      }
-    }
-  `;
-
   const maxSkip = difficulty === "MEDIUM" ? 1200 : 500;
   const randomSkip = Math.floor(Math.random() * maxSkip);
 
   try {
-    const json = await graphqlFetch<{ data?: { problemsetQuestionList?: { questions: LeetCodeTagQuestion[] } } }>(
-      query,
+    const json = await graphqlFetch<ProblemsetResponse>(
+      PROBLEMSET_QUERY,
       { categorySlug: "", limit, skip: randomSkip, filters: { difficulty } }
     );
     return json.data?.problemsetQuestionList?.questions || [];
